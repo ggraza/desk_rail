@@ -1,0 +1,222 @@
+/**
+ * Desk Rail� stylesheet
+ * Copyright (c) 2026, G2Virtu.com GNU AGPL v3 (see license.txt)
+ *
+ * Layout-critical rules are keyed on <html> (not body) so they apply the
+ * instant desk_rail.js commits the classes — before first paint — which is what
+ * keeps the load free of layout shift. No load-time transitions.
+ */
+
+:root {
+    --dr-rail-w: 274px;
+    scrollbar-width: none !important;
+    scrollbar-color: transparent transparent !important;
+}
+
+/* The native page side section (workspace/list/form) is replaced by the rail. */
+.layout-side-section {
+    display: none;
+}
+
+/* =====================================================================
+   Layout lock — committed on <html> pre-paint (no shift)
+   ===================================================================== */
+html.dr-rail-active.dr-replace-sidebar .desk-sidebar {
+    display: none !important;
+}
+
+/* offset the page content by the rail width; navbar (fixed/own row) is untouched */
+html.dr-rail-active.dr-replace-sidebar:not(.dr-rail-collapsed) #body {
+    padding-left: var(--dr-rail-w);
+}
+
+/* the native workspace-page sidebar toggle is redundant now */
+html.dr-rail-active .page-container[data-page-route="Workspaces"] .sidebar-toggle-btn {
+    display: none !important;
+}
+
+/* =====================================================================
+   Optional desk refinements
+   ===================================================================== */
+html.dr-fullwidth-navbar .navbar .container {
+    max-width: none;
+    width: 100%;
+}
+html.dr-hide-filterbar .page-form .standard-filter-section {
+    display: none !important;
+}
+
+/* =====================================================================
+   The rail
+   ===================================================================== */
+.dr-rail {
+    position: fixed;
+    top: var(--navbar-height, 60px);
+    left: 0;
+    bottom: 0;
+    width: var(--dr-rail-w);
+    overflow-y: auto;
+    overflow-x: hidden;
+    background: var(--fg-color, var(--card-bg));
+    border-right: 1px solid var(--border-color);
+    z-index: 4;
+    padding: 8px 0 24px;
+}
+
+/* persistent show/hide — only the user toggle animates, never the load */
+html.dr-rail-collapsed .dr-rail {
+    transform: translateX(-100%);
+    transition: transform 0.2s ease;
+}
+
+.dr-rail-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.dr-rail-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    margin: 0 6px;
+    border-radius: var(--border-radius-md, 6px);
+    color: var(--text-color);
+    font-size: var(--text-base, 14px);
+    line-height: 1.35;
+    text-decoration: none;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.dr-rail-item:hover {
+    background: var(--hover-color, var(--gray-100));
+    color: var(--text-color);
+    text-decoration: none;
+}
+.dr-rail-item.active {
+    background: var(--bg-blue, var(--gray-200));
+    color: var(--text-color);
+    font-weight: 600;
+}
+.dr-rail-icon {
+    display: inline-flex;
+    flex: 0 0 auto;
+    width: 16px;
+    height: 16px;
+    color: var(--icon-color, var(--gray-600));
+}
+.dr-rail-icon svg {
+    width: 16px;
+    height: 16px;
+}
+.dr-rail-label {
+    flex: 1 1 auto;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.dr-rail-arrow {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    padding: 2px;
+    border-radius: 4px;
+    color: var(--text-muted, var(--gray-700));
+}
+.dr-rail-arrow:hover {
+    background: var(--gray-200);
+    color: var(--text-color, var(--gray-900));
+}
+.dr-rail-arrow svg {
+    width: 15px;
+    height: 15px;
+    stroke-width: 2.25;
+    transition: transform 0.15s ease;
+}
+.dr-rail-group.dr-open > .dr-rail-item .dr-rail-arrow svg {
+    transform: rotate(180deg);
+}
+
+.dr-rail-children {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.dr-rail-children.hidden {
+    display: none;
+}
+
+/* navbar toggle (left of the logo) */
+.dr-rail-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    margin-right: 8px;
+    flex: 0 0 auto;
+    border-radius: var(--border-radius-md, 6px);
+    color: var(--navbar-icon-color, var(--text-color));
+}
+.dr-rail-toggle:hover {
+    background: var(--fg-hover-color, var(--gray-200));
+}
+.dr-rail-toggle svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* =====================================================================
+   Mobile — rail overlays content (never offsets it)
+   ===================================================================== */
+@media (max-width: 768px) {
+    html.dr-rail-active.dr-replace-sidebar:not(.dr-rail-collapsed) #body {
+        padding-left: 0;
+    }
+    .dr-rail {
+        z-index: 1030;
+        box-shadow: var(--shadow-lg, 0 4px 24px rgba(0, 0, 0, 0.2));
+        transition: transform 0.2s ease;
+    }
+}
+
+/* =====================================================================
+   Submenus: workspace > card > link
+   ===================================================================== */
+.dr-rail-group.dr-no-kids > .dr-rail-item .dr-rail-arrow {
+    visibility: hidden;          /* workspace has no cards/children */
+}
+
+/* card header (collapsible, non-navigating) */
+.dr-rail-card-head {
+    font-size: var(--text-sm, 12px);
+    font-weight: 600;
+    color: var(--text-muted, var(--gray-700));
+    user-select: none;
+    display: flex;
+}
+.dr-rail-card-head:hover {
+    color: var(--primary-color, var(--text-color));
+}
+.dr-rail-group.dr-open > .dr-rail-card-head .dr-rail-arrow svg {
+    transform: rotate(180deg);
+}
+
+/* leaf links */
+
+.dr-rail-leaf:hover .dr-rail-dot,
+.dr-rail-leaf.active .dr-rail-dot {
+    background: var(--primary-color, var(--text-color));
+}
+
+.dr-rail-leaf .dr-rail-icon,
+.dr-rail-leaf .dr-rail-icon svg {
+    width: 14px;
+    height: 14px;
+}
+.dr-rail-leaf {
+    font-size: var(--text-sm, 13px);
+}
